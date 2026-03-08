@@ -49,7 +49,8 @@ var gol = (x, ...args) => {let sum = args.reduce((partialSum, a) => partialSum +
 
 var test = new CA([0, 1], [5, 5], gol);
 
-// get neighborhood done
-// get transition done
+// make run work
+// get wrapp done
+// test
 
 // get statespace
