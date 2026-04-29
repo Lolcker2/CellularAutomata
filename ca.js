@@ -15,38 +15,24 @@ class CA
     }
 
 
-    NeighborhoodSelection(coordVector, neighboorhood)
+    NeighborhoodSelection(coordVector, neighborhood)
     {
         const latticedNeighborhood = neighborhood.flatMap(neighbor => {
             try {
-                return [neighbor.reduce((current, coord) => current[coord], this.lattice)];
+                return [Utils.atVec(this.lattice, neighbor)];
             } catch {
                 return Utils.Skip;
             }
         });
 
-
-            /* 
-    
-    const lastIndex = indices[indices.length - 1];
-const parentIndices = indices.slice(0, -1);
-
-// 2. Navigate to the parent container
-const parent = parentIndices.reduce((current, index) => current[index], multiArray);
-
-// 3. Modify the original array using the last index
-parent[lastIndex] = newValue;
-
-    */
-
-       // coordVector.reduce((current, coord) => current[coord], this.lattice) = Utils.Noop // apply the transition
+        Utils.UpdateHyperArray(this.lattice, coordVector, this.transitionFunction(Utils.atVec(this.lattice, coordVector), ...latticedNeighborhood));
+         // apply the transition
     }
 
 
     Step()
     {   
-        Utils.CartProducts(this.sizes[0], this.sizes[1], Utils.CHORD_TYPE.DIAMETER).forEach(coordVector => {
-            console.log(coordVector);
+        Utils.CartProducts(this.sizes[0], this.sizes[1], Utils.CHORD_TYPE.DIAMETER, Array(this.sizes[1]).fill(0)).forEach(coordVector => {
             const neighboorhood = Utils.generateNeighborhood(2, 1, Utils.NEIGHBORHOOD_TYPE.VON_NEUMANN, coordVector);
             this.NeighborhoodSelection(coordVector, neighboorhood);
         });
@@ -63,6 +49,17 @@ parent[lastIndex] = newValue;
 
         this.lattice = this.CreateLattice();
         this.neighborhoodType = Utils.NEIGHBORHOOD_TYPE.VON_NEUMANN;
+        
+        console.log(this.lattice);
+        
+        this.lattice[0][1] = true;
+        this.lattice[1][0] = true;
+        this.lattice[1][1] = true;
+
+        console.log(this.lattice);
+        this.Step();
+        console.log(this.lattice);
+        console.log(this.lattice[0][0]);
     }
 }
 
@@ -71,11 +68,8 @@ parent[lastIndex] = newValue;
 var gol = (x, ...args) => {let sum = args.reduce((partialSum, a) => partialSum + a, 0); return sum == 3 || (sum==2 && x);}
 
 
-//var test = new CA([0, 1], [5, 2], gol);
+var test = new CA([false, true], [5, 2], gol);
 
-
-const l = [[1, 2], [3, 4]];
-console.log(l[...[0, 1]]);
 
 // changing [5, 5] to [5, 2] and [5, 5, 5] to [5, 3]
 // make Step work

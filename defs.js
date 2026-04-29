@@ -41,6 +41,22 @@ exports.CartProducts = (chord, dim, chordType, centerVector) =>
 }
 
 
+exports.atVec = (arr, coordVector) =>
+{
+    return coordVector.reduce((current, coord) => current[coord], arr);
+}
+
+exports.UpdateHyperArray = (arr, indices, newValue) => {
+    // get the last index
+    const lastIndex = indices[indices.length - 1];
+    const parentIndices = indices.slice(0, -1);
+
+    // reduce until reached the last list
+    const parent = exports.atVec(arr, parentIndices);
+  
+    parent[lastIndex] = newValue;
+}
+
 exports.generateNeighborhood = (dim, rad, neighboorhoodType, centerVector) =>
 {   
     const manhatttanCenter = centerVector.reduce((partialSum, a) => partialSum + Math.abs(a), 0);
