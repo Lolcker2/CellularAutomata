@@ -1,4 +1,4 @@
-var utils = require("./defs.js");
+var Utils = require("./defs.js");
 
 
 
@@ -15,24 +15,40 @@ class CA
     }
 
 
-    NeighborhoodSelection()
+    NeighborhoodSelection(coordVector, neighboorhood)
     {
+        const latticedNeighborhood = neighborhood.flatMap(neighbor => {
+            try {
+                return [neighbor.reduce((current, coord) => current[coord], this.lattice)];
+            } catch {
+                return Utils.Skip;
+            }
+        });
 
 
-        try {
-        // Risky code you want to ignore if it fails
-        riskyAction();
-        } catch {
-        // Empty block: execution just continues after this
-        }
+            /* 
+    
+    const lastIndex = indices[indices.length - 1];
+const parentIndices = indices.slice(0, -1);
 
+// 2. Navigate to the parent container
+const parent = parentIndices.reduce((current, index) => current[index], multiArray);
+
+// 3. Modify the original array using the last index
+parent[lastIndex] = newValue;
+
+    */
+
+       // coordVector.reduce((current, coord) => current[coord], this.lattice) = Utils.Noop // apply the transition
     }
 
 
-    Run()
+    Step()
     {   
-        utils.CartProducts(this.sizes[0], this.sizes[1], utils.CHORD_TYPE.DIAMETER).forEach(coordVector => {
+        Utils.CartProducts(this.sizes[0], this.sizes[1], Utils.CHORD_TYPE.DIAMETER).forEach(coordVector => {
             console.log(coordVector);
+            const neighboorhood = Utils.generateNeighborhood(2, 1, Utils.NEIGHBORHOOD_TYPE.VON_NEUMANN, coordVector);
+            this.NeighborhoodSelection(coordVector, neighboorhood);
         });
     }
 
@@ -43,11 +59,10 @@ class CA
         this.transitionFunction = transitionFunction;
         this.sizes = sizes;
 
-        this.top = utils.TOPOLOGY_TYPE.RECT; // torus or sqaure
+        this.top = Utils.TOPOLOGY_TYPE.RECT; // torus or sqaure
 
         this.lattice = this.CreateLattice();
-        console.log(this.lattice);
-        this.Run();
+        this.neighborhoodType = Utils.NEIGHBORHOOD_TYPE.VON_NEUMANN;
     }
 }
 
@@ -56,10 +71,14 @@ class CA
 var gol = (x, ...args) => {let sum = args.reduce((partialSum, a) => partialSum + a, 0); return sum == 3 || (sum==2 && x);}
 
 
-var test = new CA([0, 1], [3, 2], gol);
+//var test = new CA([0, 1], [5, 2], gol);
+
+
+const l = [[1, 2], [3, 4]];
+console.log(l[...[0, 1]]);
 
 // changing [5, 5] to [5, 2] and [5, 5, 5] to [5, 3]
-// make run work
+// make Step work
 // get wrapp done
 // test
 

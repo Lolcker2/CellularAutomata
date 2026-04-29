@@ -1,14 +1,21 @@
-let Enum = Object.freeze
+exports.Enum = Object.freeze
+exports.Skip = []
+exports.Noop = () => {}
 
-const TOPOLOGY_TYPE = Enum({
+exports.TOPOLOGY_TYPE = exports.Enum({
     RECT: 0,
     TOR: 1
 });
 
-
-const CHORD_TYPE = Enum({
+exports.CHORD_TYPE = exports.Enum({
     RADIUS: 0,
     DIAMETER: 1
+});
+
+exports.NEIGHBORHOOD_TYPE = exports.Enum({
+    MOORE: 0,
+    VON_NEUMANN: 1,
+    COSTUM: 2
 });
 
 
@@ -18,38 +25,46 @@ const CHORD_TYPE = Enum({
 // if it's a diameter the products are treated as absolute while for a radius they're
 //  treated as relative offsets from the midpoint
 
-const CartProducts = (chord, dim, chordType) => 
+exports.CartProducts = (chord, dim, chordType, centerVector) => 
 {   
-    const radius = chordType === CHORD_TYPE.RADIUS ? chord : Math.floor(chord/2)
-    const LineOffset = Array.from({ length: chord%2? radius*2+1 :radius*2 }, (_, i) => chordType === CHORD_TYPE.RADIUS ? i - radius: i);
+    const radius = chordType === exports.CHORD_TYPE.RADIUS ? chord : Math.floor(chord/2)
+    const LineOffset = Array.from({ length: chord%2? radius*2+1 :radius*2 }, (_, i) => chordType === exports.CHORD_TYPE.RADIUS ? i - radius: i);
     switch(dim)
     {
         case 1:
-            return LineOffset;
+            return LineOffset.map(element => element - centerVector);
         case 2:
-            return LineOffset.flatMap(x => LineOffset.map(y => [x, y]));
+            return LineOffset.flatMap(x => LineOffset.map(y => [x - centerVector[0], y - centerVector[1]]));
         case 3:
-            return LineOffset.flatMap(x => LineOffset.map(y => LineOffset.map(z => [x, y, z]))).flat();
+            return LineOffset.flatMap(x => LineOffset.map(y => LineOffset.map(z => [x - centerVector[0], y - centerVector[1], z - centerVector[2]]))).flat();
     }
 }
 
 
-
-const hood = (dim, rad) =>
-{
-    CartProducts(rad, dim, CHORD_TYPE.RADIUS).forEach(coordVector => {
-            console.log(coordVector);
-            const manhatttan = coordVector.reduce((partialSum, a) => partialSum + a, 0);
-            /*         if manhattan_dist == 0: 
-            continue  # Skip the root cell (origin)
+exports.generateNeighborhood = (dim, rad, neighboorhoodType, centerVector) =>
+{   
+    const manhatttanCenter = centerVector.reduce((partialSum, a) => partialSum + Math.abs(a), 0);
+    return exports.CartProducts(rad, dim, exports.CHORD_TYPE.RADIUS, centerVector).flatMap(coordVector => 
+    {       
             
-        if mode == "moore":
-            offsets.append(delta)
-        elif mode == "von_neumann" and manhattan_dist <= radius:
-            offsets.append(delta) */
+            const manhatttan = coordVector.reduce((partialSum, a) => partialSum + Math.abs(a), 0);
+            
+            if(manhatttan == manhatttanCenter) {return exports.Skip;}
+            
+            switch(neighboorhoodType)
+            {
+                case exports.NEIGHBORHOOD_TYPE.MOORE:
+                    return [coordVector];
+                break;
+                
+                case exports.NEIGHBORHOOD_TYPE.VON_NEUMANN:
+                    return manhatttan-manhatttanCenter <= rad? [coordVector] : exports.Skip;
+                break;
 
+                default:
+                    return exports.Skip;
+                break;
+            }
     });
 }
 
-
-module.exports = {hood, CHORD_TYPE, CartProducts, TOPOLOGY_TYPE, Enum}
