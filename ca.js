@@ -7,14 +7,11 @@ class CA
     CreateLattice()
     {
         let elem = this.stateSet[0];
-        const sizes = Array(this.sizes[1]).fill(this.sizes[0]);
-        sizes.forEach(dim => {
-            elem = Array(dim).fill(elem);
-        });
-        return elem;
+        const sizes = Array(this.sizes[1]).fill(this.sizes[0]); // [5, 2] -> [5, 5]
+        return Utils.hyperDimArray(sizes, this.stateSet[0]);
     }
 
-
+    // problematic
     NeighborhoodSelection(coordVector, neighborhood)
     {
         const latticedNeighborhood = neighborhood.flatMap(neighbor => {
@@ -25,6 +22,7 @@ class CA
             }
         });
 
+        console.log(`neighborhood ${latticedNeighborhood}`);
         Utils.UpdateHyperArray(this.lattice, coordVector, this.transitionFunction(Utils.atVec(this.lattice, coordVector), ...latticedNeighborhood));
          // apply the transition
     }
@@ -38,6 +36,16 @@ class CA
         });
     }
 
+
+    Print()
+    {   
+        Utils.CartProducts(this.sizes[0], this.sizes[1], Utils.CHORD_TYPE.DIAMETER, Array(this.sizes[1]).fill(0)).forEach(coordVector => {
+            console.log(`${coordVector}: [${Utils.atVec(this.lattice, coordVector)}]`);
+        });
+    }
+
+
+
     constructor(stateSet, sizes, transitionFunction) //neighborhood, transition
     {
         // field initialization
@@ -50,26 +58,26 @@ class CA
         this.lattice = this.CreateLattice();
         this.neighborhoodType = Utils.NEIGHBORHOOD_TYPE.VON_NEUMANN;
         
-        console.log(this.lattice);
         
-        this.lattice[0][1] = true;
-        this.lattice[1][0] = true;
-        this.lattice[1][1] = true;
-
+        this.lattice[0][1] = 1;
+        this.lattice[1][0] = 1;
+        this.lattice[1][1] = 1;
+        
         console.log(this.lattice);
         this.Step();
         console.log(this.lattice);
-        console.log(this.lattice[0][0]);
     }
 }
 
 // the format for a transition function is the current cell, and a spread ordered list of the neighboorhood
 // whether the neighborhood is moore of von neuman will be determined by the selection of the elements of the ordered list
-var gol = (x, ...args) => {let sum = args.reduce((partialSum, a) => partialSum + a, 0); return sum == 3 || (sum==2 && x);}
+var gol = (x, ...args) => {let sum = args.reduce((partialSum, a) => partialSum + a, 0); console.log(sum); return (sum == 3 || (sum==2 && x))?1:0;}
 
 
-var test = new CA([false, true], [5, 2], gol);
+var test = new CA([0, 1], [5, 2], gol);
 
+
+//console.log(gol(0, 1, 1, 1, 0, 0, 0, 0, 0))
 
 // changing [5, 5] to [5, 2] and [5, 5, 5] to [5, 3]
 // make Step work

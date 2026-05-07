@@ -40,6 +40,16 @@ exports.CartProducts = (chord, dim, chordType, centerVector) =>
     }
 }
 
+exports.hyperDimArray = (sizes, fillValue) =>
+{
+    if (sizes.length === 0) return fillValue;
+    
+    const [currentSize, ...remainingSizes] = sizes;
+    
+    return Array.from({ length: currentSize }, () => 
+        exports.hyperDimArray(remainingSizes, fillValue)
+    );
+}
 
 exports.atVec = (arr, coordVector) =>
 {
