@@ -25,18 +25,18 @@ exports.NEIGHBORHOOD_TYPE = exports.Enum({
 // if it's a diameter the products are treated as absolute while for a radius they're
 //  treated as relative offsets from the midpoint
 
-exports.CartProducts = (chord, dim, chordType, centerVector) => 
+exports.CartProducts = (chord, dim, chordType, centerVector) => // problematic sign? test method
 {   
     const radius = chordType === exports.CHORD_TYPE.RADIUS ? chord : Math.floor(chord/2)
     const LineOffset = Array.from({ length: chord%2? radius*2+1 :radius*2 }, (_, i) => chordType === exports.CHORD_TYPE.RADIUS ? i - radius: i);
     switch(dim)
     {
         case 1:
-            return LineOffset.map(element => element - centerVector);
+            return LineOffset.map(element => element + centerVector);
         case 2:
-            return LineOffset.flatMap(x => LineOffset.map(y => [x - centerVector[0], y - centerVector[1]]));
+            return LineOffset.flatMap(x => LineOffset.map(y => [x + centerVector[0], y + centerVector[1]]));
         case 3:
-            return LineOffset.flatMap(x => LineOffset.map(y => LineOffset.map(z => [x - centerVector[0], y - centerVector[1], z - centerVector[2]]))).flat();
+            return LineOffset.flatMap(x => LineOffset.map(y => LineOffset.map(z => [x + centerVector[0], y + centerVector[1], z + centerVector[2]]))).flat();
     }
 }
 
@@ -72,9 +72,7 @@ exports.generateNeighborhood = (dim, rad, neighboorhoodType, centerVector) =>
     const manhatttanCenter = centerVector.reduce((partialSum, a) => partialSum + Math.abs(a), 0);
     return exports.CartProducts(rad, dim, exports.CHORD_TYPE.RADIUS, centerVector).flatMap(coordVector => 
     {       
-            
             const manhatttan = coordVector.reduce((partialSum, a) => partialSum + Math.abs(a), 0);
-            
             if(manhatttan == manhatttanCenter) {return exports.Skip;}
             
             switch(neighboorhoodType)
@@ -94,3 +92,10 @@ exports.generateNeighborhood = (dim, rad, neighboorhoodType, centerVector) =>
     });
 }
 
+exports.printarr = (arr, message) =>
+{
+    console.log(message);
+    arr.forEach(element => {
+        console.log(element);
+    });
+}

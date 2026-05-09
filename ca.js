@@ -14,25 +14,32 @@ class CA
     // problematic
     NeighborhoodSelection(coordVector, neighborhood)
     {
+        //console.log(coordVector)
         const latticedNeighborhood = neighborhood.flatMap(neighbor => {
             try {
-                return [Utils.atVec(this.lattice, neighbor)];
+                return [Utils.atVec(this.lattice, neighbor)]; // returns nan
             } catch {
-                return Utils.Skip;
+                return Utils.Skip; // returns underfined rather than not in the arr
             }
-        });
+        }).filter(e=>e);
 
-        console.log(`neighborhood ${latticedNeighborhood}`);
+        // i never get into this block
+        if(coordVector[0] === 1) // get 0 instead of 2
+        {
+            console.log(`heyyyyyyyyyyyyyyyyyyyyyyyyyyyyy ${[Utils.atVec(this.lattice, [0, 1])]}`);
+        }
+        console.log(`latticedNeighborhood${latticedNeighborhood}`);
         Utils.UpdateHyperArray(this.lattice, coordVector, this.transitionFunction(Utils.atVec(this.lattice, coordVector), ...latticedNeighborhood));
          // apply the transition
     }
 
-
     Step()
     {   
         Utils.CartProducts(this.sizes[0], this.sizes[1], Utils.CHORD_TYPE.DIAMETER, Array(this.sizes[1]).fill(0)).forEach(coordVector => {
-            const neighboorhood = Utils.generateNeighborhood(2, 1, Utils.NEIGHBORHOOD_TYPE.VON_NEUMANN, coordVector);
-            this.NeighborhoodSelection(coordVector, neighboorhood);
+            console.log(`vecor: ${coordVector}`);
+            const neighborhood = Utils.generateNeighborhood(2, 1, Utils.NEIGHBORHOOD_TYPE.VON_NEUMANN, coordVector);
+            Utils.printarr(neighborhood, "neighborhood");
+            this.NeighborhoodSelection(coordVector, neighborhood);
         });
     }
 
