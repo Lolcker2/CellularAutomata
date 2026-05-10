@@ -25,7 +25,7 @@ exports.NEIGHBORHOOD_TYPE = exports.Enum({
 // if it's a diameter the products are treated as absolute while for a radius they're
 //  treated as relative offsets from the midpoint
 
-exports.CartProducts = (chord, dim, chordType, centerVector) => // problematic sign? test method
+exports.CartProducts = (chord, dim, chordType, centerVector) => // problematic [0, 1] doesnt have [1, 0]
 {   
     const radius = chordType === exports.CHORD_TYPE.RADIUS ? chord : Math.floor(chord/2)
     const LineOffset = Array.from({ length: chord%2? radius*2+1 :radius*2 }, (_, i) => chordType === exports.CHORD_TYPE.RADIUS ? i - radius: i);
@@ -52,7 +52,7 @@ exports.hyperDimArray = (sizes, fillValue) =>
 }
 
 exports.atVec = (arr, coordVector) =>
-{
+{   
     return coordVector.reduce((current, coord) => current[coord], arr);
 }
 
@@ -67,17 +67,20 @@ exports.UpdateHyperArray = (arr, indices, newValue) => {
     parent[lastIndex] = newValue;
 }
 
+ // problematic [0, 1] doesnt have [1, 0] in moores
 exports.generateNeighborhood = (dim, rad, neighboorhoodType, centerVector) =>
 {   
-    const manhatttanCenter = centerVector.reduce((partialSum, a) => partialSum + Math.abs(a), 0);
+    const manhatttanCenter = centerVector.reduce((partialSum, a) => partialSum + Math.abs(a), 0); // there is a problem with the calculation
+    console.log(`total: ${exports.CartProducts(rad, dim, exports.CHORD_TYPE.RADIUS, centerVector)}`);
     return exports.CartProducts(rad, dim, exports.CHORD_TYPE.RADIUS, centerVector).flatMap(coordVector => 
     {       
             const manhatttan = coordVector.reduce((partialSum, a) => partialSum + Math.abs(a), 0);
-            if(manhatttan == manhatttanCenter) {return exports.Skip;}
+            if(manhatttan == manhatttanCenter) {return exports.Skip;} // because of this
             
             switch(neighboorhoodType)
             {
                 case exports.NEIGHBORHOOD_TYPE.MOORE:
+                    console.log(`moore ${coordVector}`);
                     return [coordVector];
                 break;
                 

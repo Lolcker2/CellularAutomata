@@ -17,30 +17,31 @@ class CA
         //console.log(coordVector)
         const latticedNeighborhood = neighborhood.flatMap(neighbor => {
             try {
-                return [Utils.atVec(this.lattice, neighbor)]; // returns nan
+                console.log(`index ${neighbor}`);
+                const result = [Utils.atVec(this.lattice, neighbor)];
+                console.log(`result ${result}`);
+                return result // returns nan
             } catch {
                 return Utils.Skip; // returns underfined rather than not in the arr
             }
         }).filter(e=>e);
 
-        // i never get into this block
-        if(coordVector[0] === 1) // get 0 instead of 2
-        {
-            console.log(`heyyyyyyyyyyyyyyyyyyyyyyyyyyyyy ${[Utils.atVec(this.lattice, [0, 1])]}`);
-        }
-        console.log(`latticedNeighborhood${latticedNeighborhood}`);
-        Utils.UpdateHyperArray(this.lattice, coordVector, this.transitionFunction(Utils.atVec(this.lattice, coordVector), ...latticedNeighborhood));
-         // apply the transition
+
+        Utils.printarr(latticedNeighborhood, "latticedNeighborhood");
+        console.log(`new result ig ${this.transitionFunction(Utils.atVec(this.lattice, coordVector), ...latticedNeighborhood)}`);
+        Utils.UpdateHyperArray(this.temp_lattice, coordVector, this.transitionFunction(Utils.atVec(this.lattice, coordVector), ...latticedNeighborhood));
+        // dont change the array immeditaly, change a temp array
     }
 
     Step()
     {   
         Utils.CartProducts(this.sizes[0], this.sizes[1], Utils.CHORD_TYPE.DIAMETER, Array(this.sizes[1]).fill(0)).forEach(coordVector => {
             console.log(`vecor: ${coordVector}`);
-            const neighborhood = Utils.generateNeighborhood(2, 1, Utils.NEIGHBORHOOD_TYPE.VON_NEUMANN, coordVector);
+            const neighborhood = Utils.generateNeighborhood(2, 1, this.neighborhoodType, coordVector);
             Utils.printarr(neighborhood, "neighborhood");
             this.NeighborhoodSelection(coordVector, neighborhood);
         });
+        this.lattice = this.temp_lattice.map(e=>e);
     }
 
 
@@ -63,7 +64,8 @@ class CA
         this.top = Utils.TOPOLOGY_TYPE.RECT; // torus or sqaure
 
         this.lattice = this.CreateLattice();
-        this.neighborhoodType = Utils.NEIGHBORHOOD_TYPE.VON_NEUMANN;
+        this.temp_lattice = this.CreateLattice();
+        this.neighborhoodType = Utils.NEIGHBORHOOD_TYPE.MOORE;
         
         
         this.lattice[0][1] = 1;
