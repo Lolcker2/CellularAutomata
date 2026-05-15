@@ -19,13 +19,24 @@ exports.NEIGHBORHOOD_TYPE = exports.Enum({
 });
 
 
+class NEIGHBORHOOD
+{
+    constructor(Ntype, Rad)
+    {
+        this.Ntype = Ntype;
+        this.Rad = Rad;
+    }
+}
+
+exports.NEIGHBORHOOD = NEIGHBORHOOD;
+
 // given a chord and a number of dimentions
 // generates all cartesian products within the specified chord,
 // the cord is treated differently depending on whether its a radius or a diameter
 // if it's a diameter the products are treated as absolute while for a radius they're
 //  treated as relative offsets from the midpoint
 
-exports.CartProducts = (chord, dim, chordType, centerVector) => // problematic [0, 1] doesnt have [1, 0]
+exports.CartProducts = (chord, dim, chordType, centerVector) =>
 {   
     const radius = chordType === exports.CHORD_TYPE.RADIUS ? chord : Math.floor(chord/2)
     const LineOffset = Array.from({ length: chord%2? radius*2+1 :radius*2 }, (_, i) => chordType === exports.CHORD_TYPE.RADIUS ? i - radius: i);
@@ -67,25 +78,21 @@ exports.UpdateHyperArray = (arr, indices, newValue) => {
     parent[lastIndex] = newValue;
 }
 
- // problematic [0, 1] doesnt have [1, 0] in moores
 exports.generateNeighborhood = (dim, rad, neighboorhoodType, centerVector) =>
 {   
-    const manhatttanCenter = centerVector.reduce((partialSum, a) => partialSum + Math.abs(a), 0); // there is a problem with the calculation
-    console.log(`total: ${exports.CartProducts(rad, dim, exports.CHORD_TYPE.RADIUS, centerVector)}`);
     return exports.CartProducts(rad, dim, exports.CHORD_TYPE.RADIUS, centerVector).flatMap(coordVector => 
     {       
-            const manhatttan = coordVector.reduce((partialSum, a) => partialSum + Math.abs(a), 0);
-            if(manhatttan == manhatttanCenter) {return exports.Skip;} // because of this
+            const manhatttan = coordVector.reduce((sum, val, index) => {sum + Math.abs(val - centerVector[index])}, 0);
+            if(manhatttan == 0) {return exports.Skip;} // because of this
             
             switch(neighboorhoodType)
             {
                 case exports.NEIGHBORHOOD_TYPE.MOORE:
-                    console.log(`moore ${coordVector}`);
                     return [coordVector];
                 break;
                 
                 case exports.NEIGHBORHOOD_TYPE.VON_NEUMANN:
-                    return manhatttan-manhatttanCenter <= rad? [coordVector] : exports.Skip;
+                    return manhatttan <= rad? [coordVector] : exports.Skip;
                 break;
 
                 default:
