@@ -64,6 +64,9 @@ exports.hyperDimArray = (sizes, fillValue) =>
 
 exports.atVec = (arr, coordVector) =>
 {   
+    console.log(`${coordVector}, {${coordVector.length}}`);
+    if (coordVector.length == 1)
+        return arr[coordVector];
     return coordVector.reduce((current, coord) => current[coord], arr);
 }
 
@@ -82,7 +85,7 @@ exports.generateNeighborhood = (dim, rad, neighboorhoodType, centerVector) =>
 {   
     return exports.CartProducts(rad, dim, exports.CHORD_TYPE.RADIUS, centerVector).flatMap(coordVector => 
     {       
-            const manhatttan = coordVector.reduce((sum, val, index) => {sum + Math.abs(val - centerVector[index])}, 0);
+            const manhatttan = coordVector.reduce((sum, val, index) => {return sum + Math.abs(val - centerVector[index])}, 0);
             if(manhatttan == 0) {return exports.Skip;} // because of this
             
             switch(neighboorhoodType)

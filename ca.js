@@ -15,13 +15,13 @@ class CA
     {
         const latticedNeighborhood = neighborhood.flatMap(neighbor => {
             try {
-                return [Utils.atVec(this.lattice, neighbor)];
+                const result = [Utils.atVec(this.lattice, neighbor)];
+                return result;
             } catch {
                 return Utils.Skip
             }
         }).filter(e=>e);
-
-        Utils.UpdateHyperArray(this.temp_lattice, coordVector, this.transitionFunction(Utils.atVec(this.lattice, coordVector), ...latticedNeighborhood));
+        Utils.UpdateHyperArray(this.temp_lattice, coordVector, this.transitionFunction(Utils.atVec(this.lattice, coordVector), ...latticedNeighborhood)); 
     }
 
     Step()
@@ -56,12 +56,6 @@ class CA
         this.temp_lattice = this.CreateLattice();
         this.neighborhood = new Utils.NEIGHBORHOOD(Utils.NEIGHBORHOOD_TYPE.MOORE, 1);
         
-        
-        this.lattice[0][1] = 1;
-        this.lattice[1][2] = 1;
-        this.lattice[2][0] = 1;
-        this.lattice[2][1] = 1;
-        this.lattice[2][2] = 1;
 
         
         console.log(this.lattice);
@@ -72,17 +66,14 @@ class CA
 
 // the format for a transition function is the current cell, and a spread ordered list of the neighboorhood
 // whether the neighborhood is moore of von neuman will be determined by the selection of the elements of the ordered list
-var gol = (x, ...args) => {let sum = args.reduce((partialSum, a) => partialSum + a, 0); return (sum == 3 || (sum==2 && x))?1:0;}
+var gol = (x, ...args) => {let sum = args.reduce((partialSum, a) => partialSum + a, 0); console.log(sum); return (sum < 4 && (sum == 3 || (sum==2 && x)))?1:0;}
+var rule30 = (x, ...args) => {return args[0] ^ (x || args[1])};
+
+// gol
+//var test = new CA([0, 1], [5, 2], gol);
 
 
-var test = new CA([0, 1], [5, 2], gol);
-
-
-//console.log(gol(0, 1, 1, 1, 0, 0, 0, 0, 0))
-
-// changing [5, 5] to [5, 2] and [5, 5, 5] to [5, 3]
-// make Step work
-// get wrapp done
-// test
+// rule30
+var test = new CA([0, 1], [8, 1], rule30);
 
 // get statespace

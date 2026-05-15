@@ -12,3 +12,7 @@ class StateSpace
     }
 }
 
+let coordVector = [0, 1];
+let centerVector = [0, 0];
+const manhatttan = coordVector.reduce((sum, val, index) => {return sum + Math.abs(val - coordVector[index])}, 0);
+console.log(manhatttan);
