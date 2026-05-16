@@ -43,7 +43,7 @@ exports.CartProducts = (chord, dim, chordType, centerVector) =>
     switch(dim)
     {
         case 1:
-            return LineOffset.map(element => element + centerVector);
+            return LineOffset.map(element => {return parseInt(element) + parseInt(centerVector)});
         case 2:
             return LineOffset.flatMap(x => LineOffset.map(y => [x + centerVector[0], y + centerVector[1]]));
         case 3:
@@ -64,13 +64,19 @@ exports.hyperDimArray = (sizes, fillValue) =>
 
 exports.atVec = (arr, coordVector) =>
 {   
-    console.log(`${coordVector}, {${coordVector.length}}`);
-    if (coordVector.length == 1)
-        return arr[coordVector];
-    return coordVector.reduce((current, coord) => current[coord], arr);
+    if(Array.isArray(coordVector))
+        return coordVector.reduce((current, coord) => current[coord], arr);
+    return  arr[coordVector];
 }
 
 exports.UpdateHyperArray = (arr, indices, newValue) => {
+
+     if(!Array.isArray(indices))
+     {
+        arr[indices] = newValue;
+        return;
+     }
+
     // get the last index
     const lastIndex = indices[indices.length - 1];
     const parentIndices = indices.slice(0, -1);
@@ -84,8 +90,10 @@ exports.UpdateHyperArray = (arr, indices, newValue) => {
 exports.generateNeighborhood = (dim, rad, neighboorhoodType, centerVector) =>
 {   
     return exports.CartProducts(rad, dim, exports.CHORD_TYPE.RADIUS, centerVector).flatMap(coordVector => 
-    {       
-            const manhatttan = coordVector.reduce((sum, val, index) => {return sum + Math.abs(val - centerVector[index])}, 0);
+    {                   
+            const manhatttan = dim == 1? Math.abs(coordVector - centerVector) :
+            coordVector.reduce((sum, val, index) => {return sum + Math.abs(val - centerVector[index])}, 0);
+
             if(manhatttan == 0) {return exports.Skip;} // because of this
             
             switch(neighboorhoodType)
